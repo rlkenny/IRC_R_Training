@@ -1,0 +1,146 @@
+---
+title: "R learning"
+author: "Rachel Kenny"
+date: "3/25/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## General notes 
++ It's important to first open the "project file" and then the rmarkdown file, because this allows a user to call data without linking it to a path on the computer
++ To insert a new code chunk, press the "insert" button on the top right of the screen and then "R", or use the keyboard shortcut [ctrl + alt + i] PC / [cmd + alt + i] MAC
++ To see how a document looks altogether, you can hit the "knit" button to knit to html, pdf, or word. In other words, exporting your code as a document
+
+
+## Formatiing
++ The [#] symbol in the document section of the Rmarkdown defines headers. One [#] is the biggest header, two is slightly smaller, and so forth. If there is no "#" then it is treated as normal text. However, a [#] used in a code chunk invalidates that line of code, treating it like normal text.
++ The [+] symbol in the document denotes a bullet point
++ Using asterisks before and after text willl make it *bold*
++ Using underscores before and after text willl make it _italic_
+
+
+### Libraries
+```{r library}
+
+# Packages contain functions that are used to wrangle, analyse, and visualize data. Packages are stored in libraries, and they must be installed prior to running the code. To install any missing packages, Go to "packages" in the right hand panel, click "install", then type in the name of the package and hit "install". Once they are installed, packages can be loaded by running the function "library(name_of_library)" as seen in the first code chunk below. 
+
+library(tidyverse) # The tidyverse contains main functions that are useful for data wrangling and manipulation
+
+library(ggplot2) # The ggplot library is useful for visualizing data
+
+library(rmarkdown) # The rmarkdown library contains code relevant to rmarkdown files, such as knitting a file
+
+library(readr) # This library helps you read data
+
+library(janitor) # This helps clean data. R does not like spaces and special characters in column names, so it's better if all column names are cleaned before manipulation
+
+```
+
+
+## Within a code chunk
++ Use a [#] to tell R not to treat text as code when you are trying to make notes, or highlight the relevant text and hit [ctrl + alt + C] PC / [command + alt + C] MAC
++ Character data must always be in quotes. For example if I were looking for "BACSAL" in the data it would need to be in quotes
++ Using [<-] names an object (dataframe, plot, etc.) within the code. For example your data file likely has a long name but is easier to refer to as [mitigation_data]. 
++ To run code click "run" in the upper right hand corner and select an option, or hit [ctrl + enter] PC / [cmd + enter] MAC to run one line or selected code
++ Functions always use parentheses (). A common error is adding too many or too few
+
+
+### Loading data
+```{r load}
+
+# To load data, we give it a name, and then read it in according to file type (csv, excel, etc.)
+
+oak_data_raw <- read_csv("Weir_Oak_Restoration_Data_winter19.csv")
+
+View(oak_data_raw)
+
+# Pipe operators [%>%] are used to do additional functions without writing unnecessary lines of code. Think of it as if it's saying take this line of code "and then do this". In this case, we are using [clean_names] function to clean our column names (replace spaces with underscores, all lowercase, remove special characters, etc)
+
+oak_data <- oak_data_raw %>% 
+  clean_names()
+
+View(oak_data)
+
+```
+
+
+##Common operators
++ [*] multiply
++ [/] divide
++ [>] greater than 
++ [>=] greater than or equal to
++ [<] less than
++ [<=] less than or equal to
++ [=] equal to
++ [==] find a match in the data (for example, when filtering)
+
+
+### Wrangling data
+```{r wrangle}
+
+# To reveal column names, use the [names] function
+
+names(oak_data)
+
+# To only retain certain columns, use the function [select]
+
+oak_data_selection <- oak_data %>% 
+  select(survival, height_cm)
+
+View(oak_data_selection)
+
+# To filter data, use the function [filter]
+
+oak_data_survived <- oak_data %>% 
+  filter(survival == "TRUE", height_cm >= 6)
+
+View(oak_data_survived) # Now we only have seedlings that survived and are greater than or equal to 6 cm
+
+```
+
+
+```{r visualize}
+
+# ggplot allows us to visualize our data in a number of ways. Here's an example below.
+
+# Differences in seedling height between acorns planted at three elevations: upper, middle, and lower
+oak_plot <- ggplot(oak_data) + 
+  geom_bar(fill='deepskyblue3', aes(x = location_uml, y = height_cm), 
+           position = "dodge", stat = "summary", fun.y = "mean") +
+  theme_classic() +
+  xlab("Location")+
+  ylab("Seedling height (cm)")+
+  scale_x_discrete(expand=c(0.3,0))+
+  scale_y_continuous(expand=c(0,0))+
+  theme(axis.title.y = element_text(size = 10))
+
+oak_plot
+
+
+# This plot shows a count of the number of seedlings that survived vs didn't
+
+oak_plot2 <- ggplot(oak_data, aes(survival)) +
+  geom_bar(fill="turquoise4") +
+  xlab("Survival") +
+  ylab("Count") +
+  ggtitle("Seedling Survival in Weir Canyon") +
+  scale_x_discrete(expand=c(0.5,0))+
+  scale_y_continuous(expand=c(0,0))
+
+oak_plot2
+
+```
+
+
+
+
+
+
+
+
+
