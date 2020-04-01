@@ -1,5 +1,5 @@
 ---
-title: "R learning"
+title: "R Training 1"
 author: "Rachel Kenny"
 date: "3/25/2020"
 output:
@@ -104,6 +104,7 @@ View(oak_data_survived) # Now we only have seedlings that survived and are great
 ```
 
 
+### Visualizing data
 ```{r visualize}
 
 # ggplot allows us to visualize our data in a number of ways. Here's an example below.
