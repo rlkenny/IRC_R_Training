@@ -24,11 +24,11 @@ library(readxl)
 library(tidyverse)
 library(janitor)
 
-# Agua chinon veg data
+# Load agua chinon veg data
 ac_data_raw <- read_excel("OCWR_AC_2019_Data.xlsx")
 ac_data <- clean_names(ac_data_raw)
 
-# Weir oak restoration data
+# Load weir oak restoration data
 oak_data_raw <- read_csv("Weir_Oak_Restoration_Data_winter19.csv")
 oak_data <- oak_data_raw %>% 
   clean_names()
