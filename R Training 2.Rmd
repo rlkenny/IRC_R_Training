@@ -33,14 +33,22 @@ oak_data_raw <- read_csv("Weir_Oak_Restoration_Data_winter19.csv")
 oak_data <- oak_data_raw %>% 
   clean_names()
 
+
+
 ```
 
 
 ### Data wrangling 1
 ```{r wrangle1}
+
+ac_data2 <- ac_data %>% 
+  select(polygon_id, transect)
+
 # To refer to a column in a dataframe, you can use a [$] symbol
 oak_data$height_cm
 View(oak_data$height_cm)
+
+View(oak_data)
 
 # Another way to refer to a column is by referring to the number of the column using square brackets []. Using a colon indicates subsequent columns. For example [4:6] means columns 4 through 6. Using a negative means everthing except for that column.
 oak_data[4]
@@ -56,9 +64,12 @@ ac_data$polygon_id[which(ac_data$polygon_id=="5M Buffer")] <- "5M BUFFER"
 ac_data2 <- ac_data
 names(ac_data2)[1] <- paste("habitat") # name column 1 "habitat"
 
+
 # Method 2: use function [colnames] 
 ac_data2 <- ac_data
 colnames(ac_data2)[4:6] <- c("pin", "type_data", "code_species") # rename columns 4 through 6
+
+View(ac_data2)
 
 
 ```
@@ -89,7 +100,6 @@ View(oak_data3)
 
 # agua chinon data example - number of observations per species code in each polygon and transect
 richness1 <- ac_data %>%
-  select(transect, polygon_id, species_code) %>% 
   group_by(polygon_id, transect) %>% 
   count(species_code)
 
@@ -97,11 +107,13 @@ View(richness1)
 
 # oak data example - # of plantings watered or not watered by sampling group
 oak_water_sampling_grp <- oak_data %>% 
-  select(sampling_group, water_yes_no) %>% 
   group_by(sampling_group) %>% 
   count(water_yes_no)
 
 View(oak_water_sampling_grp)
+
+View(oak_data)
+
 
 ```
 
