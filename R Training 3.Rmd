@@ -1,0 +1,194 @@
+---
+title: "R Training 3"
+author: "Rachel Kenny"
+date: "4/16/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Loading packages & data
+```{r load}
+
+# Load packages
+library(readxl)
+library(readr)
+library(tidyverse)
+library(janitor)
+
+# Load agua chinon veg data
+ac_data_raw <- read_excel("OCWR_AC_2019_Data.xlsx")
+ac_data <- clean_names(ac_data_raw)
+
+# Load weir oak restoration data
+oak_data_raw <- read_csv("Weir_Oak_Restoration_Data_winter19_2.csv")
+oak_data <- oak_data_raw %>% 
+  clean_names()
+
+```
+
+
+### Data wrangling
+```{r wrangle1}
+
+# dim() gives you dimensions
+dim(oak_data) 
+dim(ac_data) 
+
+# head() shows first 6 lines of data
+head(oak_data) 
+head(ac_data) 
+
+# tail() shows last 6 lines of data
+tail(oak_data) 
+tail(ac_data) 
+
+
+# summary() shows the class and statistical summary of data
+summary(oak_data)
+summary(ac_data)
+
+View(oak_data)
+View(ac_data)
+
+# To change the class use as.character or as.numeric
+oak_data$survival <- as.character(oak_data$survival)
+oak_data$survival <- as.numeric(oak_data$survival)
+
+class(ac_data$transect)
+
+ac_data$transect <- as.character(ac_data$transect)
+
+class(ac_data$transect)
+
+```
+
+
+### Data visualization 1
+```{r viz}
+
+hist(oak_data$height_cm)
+
+plot1 <- ggplot(oak_data, aes(x=open_closed, y=height_cm)) + 
+  geom_point()
+
+plot1
+```
+
+
+### Data visualization 2
+```{r viz2}
+
+# Side by side plots
+plot2 <- ggplot(oak_data, aes(location_uml, fill=survival)) +
+  geom_bar(position="dodge") + #this is where the code changes each time.
+  xlab("Location") +
+  ylab("Count") +
+  ggtitle("Survival of Oak Seedlings by Location") +
+  scale_x_discrete(expand=c(0.3,0)) +
+  scale_y_continuous(expand=c(0,0)) +
+  theme_minimal() +
+  theme(plot.title=element_text(face="bold", family = "serif"))
+
+plot2
+
+# Normalized stacked plots
+plot3 <- ggplot(oak_data, aes(location_uml, fill=survival)) +
+  geom_bar(position="fill") + #this is where the code changes each time.
+  xlab("Location") +
+  ylab("Count") +
+  ggtitle("Survival of Oak Seedlings by Location") +
+  scale_x_discrete(expand=c(0.3,0)) +
+  scale_y_continuous(expand=c(0,0)) +
+  theme_minimal() +
+  theme(plot.title=element_text(face="bold", family = "serif"))
+
+plot3
+
+# Stacked plots
+plot4 <- ggplot(oak_data, aes(location_uml, fill=survival)) +
+  geom_bar(position="stack") + #this is where the code changes each time.
+  xlab("Location") +
+  ylab("Count") +
+  ggtitle("Survival of Oak Seedlings by Location") +
+  scale_x_discrete(expand=c(0.3,0)) +
+  scale_y_continuous(expand=c(0,0)) +
+  theme_minimal() +
+  theme(plot.title=element_text(face="bold", family = "serif"))
+
+plot4
+
+
+# Stacked plots
+plot4 <- ggplot(ac_data, aes(polygon_id, fill=native_non_native)) +
+  geom_bar(position="stack") + #this is where the code changes each time.
+  xlab("Location") +
+  ylab("Count") +
+  ggtitle("Survival of Oak Seedlings by Location") +
+  scale_x_discrete(expand=c(0.3,0)) +
+  scale_y_continuous(expand=c(0,0)) +
+  theme_minimal() +
+  theme(plot.title=element_text(face="bold", family = "serif"))
+
+plot4
+
+# Stacked plots
+plot5 <- ggplot(ac_data, aes(polygon_id, fill=native_non_native)) +
+  geom_bar(position="fill") + #this is where the code changes each time.
+  xlab("Location") +
+  ylab("Count") +
+  ggtitle("Survival of Oak Seedlings by Location") +
+  scale_x_discrete(expand=c(0.3,0)) +
+  scale_y_continuous(expand=c(0,0)) +
+  theme_minimal() +
+  theme(plot.title=element_text(face="bold", family = "serif"))
+
+plot5
+
+```
+
+
+## Calculate species richness
+```{r richness}
+
+ac_data$polygon_id[which(ac_data$polygon_id=="5M Buffer")] <- "5M BUFFER"
+
+
+ac_native <- ac_data %>% 
+  dplyr::filter(native_non_native == "Native")
+
+
+# richness1 - select relevant colunms, group by polygon ID and transect #, and sum the number of each species recorded per polygon ID & transect
+richness1 <- ac_native %>%
+  select(transect, polygon_id, species_code) %>% 
+  group_by(polygon_id, transect) %>% 
+  count(species_code)
+# View(richness1)
+
+
+
+# richness2 - add column for the number of unique species per transect
+richness2 <- richness1 %>% 
+  mutate(unique_species=n_distinct(species_code)) %>% 
+  select(transect, polygon_id, unique_species)
+richness2 <- distinct(richness2)
+View(richness2)
+
+
+
+# richness3 - For any polygon with more than one transect, take averages of number of unique species per polygon ID
+richness3 <- aggregate(richness2[3],list(richness2$polygon_id), mean)
+colnames(richness3) <- c("polygon_id","avg_total_species")
+View(richness3)
+richness_table <-richness3
+richness_table$avg_total_species <- round(richness_table$avg_total_species) 
+ View(richness_table)
+
+```
+
+
+
