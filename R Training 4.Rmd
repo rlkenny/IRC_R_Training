@@ -30,13 +30,13 @@ oak_data_raw <- read_csv("Weir_Oak_Restoration_Data_winter19_2.csv")
 oak_data <- clean_names(oak_data_raw) 
 
 # Load original oak data
-oak_data_old <- read_csv("Weir_Oak_Restoration_Data_winter19.csv") %>% clean_names(oak_data_old) 
+oak_data_old <- read_csv("Weir_Oak_Restoration_Data_winter19.csv") %>%
+  clean_names() 
 
 # Load arthropod data
 arth_data <- read_csv("IRC_restoration_arthropod_data.csv") %>% 
   clean_names()
 
-View(arth_data)
 
 ```
 
@@ -56,13 +56,13 @@ View(arth_data)
 ## Practice subsetting data
 ```{r subset}
 
-# To return rows 1-3
+# To return columns 1-3
 ac_data[1:3]
 
-# To return columns 1-3
+# To return rows 1-3
 ac_data[1:3,]
 
-# To return rows 1-3 (same as first option)
+# To return columns 1-3 (same as first option)
 ac_data[,1:3]
 
 # Single brackets extract a list
@@ -129,6 +129,7 @@ min(oak_data$height_cm)
 
 # Summarize data
 summary(oak_data)
+summary(oak_data$height_cm)
 
 ```
 
@@ -151,6 +152,8 @@ max(oak_data_old$height_cm, na.rm = TRUE)
 # Lowest number
 min(oak_data_old$height_cm, na.rm = TRUE)
 
+View(oak_data_old)
+
 # Identify problem rows
 which(is.na(oak_data_old$height_cm)) #819
 which(grepl(834, oak_data_old$height_cm)) #933
@@ -158,67 +161,17 @@ which(grepl(834, oak_data_old$height_cm)) #933
 # Edit data
 # Method 1
 oak_data_new <- oak_data_old[-c(819, 933), ] 
-View(oak_data_new)
+summary(oak_data_new$height_cm)
+mean(oak_data_new$height_cm)
 
+
+View(oak_data_old)
 # Method 2
 oak_data_new <- oak_data_old[ !(oak_data_old$short_id %in% c("U_C_33_1", "U_C_04_3")), ]
 View(oak_data_new)
+mean(oak_data_new$height_cm)
 
 # It is always safer to delete data according to some sort of identifying value than to delete by row number. Row numbers can change as data is filtered and altered and it is therefor not the safest
-
-```
-
-
-## Tidyr - Spread and gather
-A table is considered tidy data if each variables is in it's own column, each row represents one observation, and each cell has a single value. It is sometimes necessary to rearrange the data in order to suit the needs of the analysis or data visualization.
-
-Data is rearranged according to the key and the value. The key is an attribute and explains what the data describes. The value is the value of the observation described by the key.
-
-+ Spread() is used to seperate data from one column into many
-+ Gather() is used to take two columns, the key column and value column, and seperate them into many columns based on the key column attributes
-
-Spread(data, key, value)
-Gather(data, key, value)
-
-Check out these links for more information:
-https://garrettgman.github.io/tidying/
-
-
-## Spread and gather examples
-```{r spread_gather}
-
-# Gather - we are taking all of the proportional biomass values and placing them in one column
-arth_data_2 <- arth_data %>% 
-  select(transect, year_restoration, detritivores, herb_chew, herb_suck, parasitoid, pollinator, predator, scavenger) %>% 
-  gather("functional_group", "proportional_biomass", 3:9)
-
-View(arth_data_2)
-
-# Spread - we are taking all of the proportional biomass and seperating them back out by their type
-arth_data_3 <- arth_data_2 %>% 
-  spread("functional_group", "proportional_biomass")
-
-View(arth_data_3)
-
-# By treating restoration year as a factor, we can have the graph aligned so that years 0, 1, 3, and 5 are equidistant
-arth_data_2$year_restoration <- as.factor(arth_data_2$year_restoration)
-
-# Create a ggplot
-plot_arth <- ggplot(arth_data_2) + 
-  geom_bar(aes(x = year_restoration, y = proportional_biomass, fill = functional_group), position = "fill", stat = "summary", fun.y = "mean") +
-  theme_classic() +
-  ggtitle("Changes in proportional biomass of arthropods over time") +
-  xlab("Year of restoration") +
-  ylab("Proportional biomass") +
-  scale_y_continuous(expand=c(0,0), breaks = c(.2,.4,.6,.8,1))+
-  scale_x_discrete(expand=c(0.2,0))+
-  scale_fill_brewer("Functional Group",palette="Set2", labels=c("Detritivore", "Herbivore (chewing)", "Herbivore (sucking)", "Parasitoid", "Pollinator", "Predator", "Scavenger")) +
-  theme(plot.title = element_text(face="bold", size = 11),
-        axis.title = element_text(size=8),
-        legend.title = element_text(size=8, face="bold"),
-        legend.text = element_text(size=8))
-
-plot_arth
 
 ```
 

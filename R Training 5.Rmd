@@ -1,0 +1,146 @@
+---
+title: "R Training 5"
+author: "Rachel Kenny"
+date: "5/21/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+## Loading packages & data
+```{r load}
+
+# Load packages
+library(readxl)
+library(readr)
+library(tidyverse)
+library(janitor)
+
+# Load agua chinon veg data
+ac_data_raw <- read_excel("OCWR_AC_2019_Data.xlsx")
+ac_data <- clean_names(ac_data_raw)
+ac_data$polygon_id[which(ac_data$polygon_id=="5M Buffer")] <- "5M BUFFER"
+
+# Load weir oak restoration data
+oak_data_raw <- read_csv("Weir_Oak_Restoration_Data_winter19_2.csv")
+oak_data <- clean_names(oak_data_raw) 
+
+# Load arthropod data
+arth_data <- read_csv("IRC_restoration_arthropod_data.csv") %>% 
+  clean_names()
+
+# Load cougar example data
+cougar <- read_csv("example_cougars.csv")
+
+```
+
+## Review 
+```{r review}
+
+# Show how you would refer to the 4th-6th rows of the oak dataframe using square brackets
+
+
+# Using the arthropod data, write an ifelse statement to create a new column which assigns a 0 if the proportional biomass of predators is below .5, and the correct value for biomass if it is above .5
+
+
+# Next, using the oak restoration data write an ifelse statement to create a new column based on location which assigns Lower to "L", Middle to "M" and Upper to "U".
+
+
+# Show me the mean and standard deviation of pin number in the agua chinon dataset. How can I check whether pin number is normally distrbuted?
+
+```
+
+
+
+## Tidyr - Spread and gather
+A table is considered tidy data if each variables is in it's own column, each row represents one observation, and each cell has a single value. It is sometimes necessary to rearrange the data in order to suit the needs of the analysis or data visualization.
+
+Data is rearranged according to the key and the value. The key is an attribute and explains what the data describes. The value is the value of the observation described by the key.
+
+Data can sometimes be in wide or long format. In wide format, categorical data is grouped. Wide data if often easier to read and interpret, but can sometimes lead to issues in conducting analses or visualizing data in r. In long format (think long vertically), every row represents an observation belonging to a particular category.
+
++ Spread() is used to seperate data from two columns into many, based on the number of categories. In other words, go from long to wide format. The key column is used to assign categories to the header of each column, and the values get arranged by category.
+
++ Gather() is used to take more than one column, and consolidate them into two columns based on the key column attributes. In other words, go from wide to long. The key column contains the categorical data, and the value column contains the corresponding values.
+
+Spread(data, key, value)
+Gather(data, key, value)
+
+Check out these links for more information:
+https://github.com/rstudio/cheatsheets/blob/master/data-import.pdf
+https://garrettgman.github.io/tidying/
+
+
+## Spread and gather example 1
+```{r spread_gather1}
+
+# What kind of data is this?
+
+View(cougar)
+
+# How can we convert the data format?
+
+
+```
+
+## Spread and gather example 2
+```{r spread_gather2}
+
+# Problem - we want to create a plot showing the changes in proportional biomass of various functional groups over time, but our data is not set up in a way that is conducive to making that plot.
+
+plot_arth <- ggplot(arth_data_2) + 
+  geom_bar(aes(x = year_restoration, y = proportional_biomass, fill = functional_group), position = "fill", stat = "summary", fun.y = "mean") +
+  theme_classic() +
+  ggtitle("Changes in proportional biomass of arthropods over time") +
+  xlab("Year of restoration") +
+  ylab("Proportional biomass") +
+  scale_y_continuous(expand=c(0,0), breaks = c(.2,.4,.6,.8,1))+
+  scale_x_discrete(expand=c(0.2,0))+
+  scale_fill_brewer("Functional Group",palette="Set2", labels=c("Detritivore", "Herbivore (chewing)", "Herbivore (sucking)", "Parasitoid", "Pollinator", "Predator", "Scavenger")) +
+  theme(plot.title = element_text(face="bold", size = 11),
+        axis.title = element_text(size=8),
+        legend.title = element_text(size=8, face="bold"),
+        legend.text = element_text(size=8))
+
+
+# Gather - we are taking all of the proportional biomass values and placing them in one column
+arth_data_2 <- arth_data %>% 
+  select(transect, year_restoration, detritivores, herb_chew, herb_suck, parasitoid, pollinator, predator, scavenger) %>% 
+  gather("functional_group", "proportional_biomass", 3:9)
+
+View(arth_data_2)
+
+# Spread - we are taking all of the proportional biomass and seperating them back out by their type
+arth_data_3 <- arth_data_2 %>% 
+  spread("functional_group", "proportional_biomass")
+
+View(arth_data_3)
+
+# By treating restoration year as a factor, we can have the graph aligned so that years 0, 1, 3, and 5 are equidistant
+arth_data_2$year_restoration <- as.factor(arth_data_2$year_restoration)
+
+# Create a ggplot
+plot_arth <- ggplot(arth_data_2) + 
+  geom_bar(aes(x = year_restoration, y = proportional_biomass, fill = functional_group), position = "fill", stat = "summary", fun.y = "mean") +
+  theme_classic() +
+  ggtitle("Changes in proportional biomass of arthropods over time") +
+  xlab("Year of restoration") +
+  ylab("Proportional biomass") +
+  scale_y_continuous(expand=c(0,0), breaks = c(.2,.4,.6,.8,1))+
+  scale_x_discrete(expand=c(0.2,0))+
+  scale_fill_brewer("Functional Group",palette="Set2", labels=c("Detritivore", "Herbivore (chewing)", "Herbivore (sucking)", "Parasitoid", "Pollinator", "Predator", "Scavenger")) +
+  theme(plot.title = element_text(face="bold", size = 11),
+        axis.title = element_text(size=8),
+        legend.title = element_text(size=8, face="bold"),
+        legend.text = element_text(size=8))
+
+plot_arth
+
+```
+
+
+
