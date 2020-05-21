@@ -34,7 +34,8 @@ arth_data <- read_csv("IRC_restoration_arthropod_data.csv") %>%
   clean_names()
 
 # Load cougar example data
-cougar <- read_csv("example_cougars.csv")
+cougar <- read_csv("example_cougars.csv") %>% 
+  clean_names
 
 ```
 
@@ -45,7 +46,6 @@ cougar <- read_csv("example_cougars.csv")
 
 
 # Using the arthropod data, write an ifelse statement to create a new column which assigns a 0 if the proportional biomass of predators is below .5, and the correct value for biomass if it is above .5
-
 
 # Next, using the oak restoration data write an ifelse statement to create a new column based on location which assigns Lower to "L", Middle to "M" and Upper to "U".
 
@@ -82,14 +82,17 @@ https://garrettgman.github.io/tidying/
 ## Spread and gather example 1
 ```{r spread_gather1}
 
-# What kind of data is this?
+# What kind of data is the cougar?
 View(cougar)
 
 # How can we convert the data format?
+cougar_gtr <- gather(cougar, "year", "total_cougars", 3:5)
 
+View(cougar_gtr)
 
 # Now how can we convert it back to its original format?
-
+cougar_spd <- spread(cougar_gtr, "year", "total_cougars")
+View(cougar_spd)
 
 ```
 
@@ -139,20 +142,24 @@ plot_pred
 
 ## Spread and gather example 2
 ```{r spread_gather2}
-# Gather - we are taking all of the proportional biomass values and placing them in one column
+
+# Let's select the relevant columns. I always retain the ID (transect in this case) and then we want to retain year of restoration, and the functional group values
+arth_data_2 <- arth_data %>% 
+  select(transect, year_restoration, detritivores, herb_chew, herb_suck, parasitoid, pollinator, predator, scavenger) 
+
+# Next we need to either spread or gather - which one?
 arth_data_2 <- arth_data %>% 
   select(transect, year_restoration, detritivores, herb_chew, herb_suck, parasitoid, pollinator, predator, scavenger) %>% 
   gather("functional_group", "proportional_biomass", 3:9)
+  
 
 View(arth_data_2)
 
-# Spread - we are taking all of the proportional biomass and seperating them back out by their type
-arth_data_3 <- arth_data_2 %>% 
-  spread("functional_group", "proportional_biomass")
+# Then if we wanted to return the data to it's original format how would we do that?
 
-View(arth_data_3)
 
-# By treating restoration year as a factor, we can have the graph aligned so that years 0, 1, 3, and 5 are equidistant
+# Now we're ready to plot! Use your long form dataframe for the ggplot. Note, we want to treat restoration year as a factor, so we can have the graph aligned so that years 0, 1, 3, and 5 are equidistant, rather than how they were oddly spaced in the previous example. This will make it easier to make comparisons between groups.
+
 arth_data_2$year_restoration <- as.factor(arth_data_2$year_restoration)
 
 # Create a ggplot
@@ -174,5 +181,72 @@ plot_arth
 
 ```
 
+
+# Aggregate function
+```{r}
+
+# The aggregate function can help aggregate data according to grouping. In the example below, we want to know the average number of cougars seen at each location, regardless of camera A or B.
+
+View(cougar)
+
+cougar2 <- aggregate(cougar[3:5],list(cougar$location), mean)
+
+View(cougar2)
+
+```
+
+
+
+# Understanding the mitigation code - calculating cover
+```{r cover}
+
+# Retain only the point-intercept data ("T.PI") and the columns for polygon ID, transect, pin number, and native/non-native.
+ac_data_cvr <- ac_data %>% 
+  dplyr::filter(data_type == "T.PI") %>% 
+  select(polygon_id, transect, pin_number, native_non_native) 
+
+cover2 <- distinct(ac_data_cvr) %>% 
+  count(polygon_id, transect, native_non_native) %>% 
+  spread(native_non_native, n)
+
+View(cover2)
+
+#Reorder columns so that non-native comes before no native veg, and set any NA values equal to zero
+cover2 <- cover2[,c(1,2,3,5,4)]
+cover2[is.na(cover2)] = 0
+
+# View(cover2)
+
+
+
+# For polygons with multiple transects, average the values per polygon id, and then round all numbers
+cover3 <- aggregate(cover2[3:5],list(cover2$polygon_id), mean)
+colnames(cover3) <- c("polygon_id","avg_native_count", "avg_non_native_count", "avg_no_native_count")
+cover3[,-1] <- round(cover3[,-1],1)
+
+# View(cover3)
+
+
+
+# ABSOLUTE COVER
+# Multiply values by 100 and divide by 50 because there are 50 sample points (pins) per transect
+cover3_table <- mutate(cover3, absolute_cover_native = avg_native_count*100/50) 
+cover3_table <- mutate(cover3_table, absolute_cover_non_native = avg_non_native_count*100/50) 
+cover3_table <- mutate(cover3_table, absolute_cover_no_native = avg_no_native_count*100/50)
+
+# RELATIVE COVER
+# To get relative native cover, take absolute native cover value and divide by absolute value native + absolute value non native, then multiply by 100. To get relative non-native cover, take absolute non-native cover value and divide by absolute value native + absolute value non native, then multiply by 100. 
+cover3_table <- mutate(cover3_table, relative_cover_native = absolute_cover_native*100/(absolute_cover_native + absolute_cover_non_native))
+cover3_table <- mutate(cover3_table, relative_cover_non_native = absolute_cover_non_native*100/(absolute_cover_native + absolute_cover_non_native))
+
+# Round all values, and isolate only the relevant columns for the summary tables
+cover3_table[,-1] <-round(cover3_table[,-1],1)
+cover3_table <- cover3_table %>% 
+  select(polygon_id, absolute_cover_native, absolute_cover_non_native, absolute_cover_no_native, relative_cover_native, relative_cover_non_native)
+
+# View(cover3_table)
+
+
+```
 
 
