@@ -56,19 +56,23 @@ cougar <- read_csv("example_cougars.csv")
 
 
 
-## Tidyr - Spread and gather
-A table is considered tidy data if each variables is in it's own column, each row represents one observation, and each cell has a single value. It is sometimes necessary to rearrange the data in order to suit the needs of the analysis or data visualization.
-
-Data is rearranged according to the key and the value. The key is an attribute and explains what the data describes. The value is the value of the observation described by the key.
+## Long and wide format data
+It is sometimes necessary to rearrange the format of data in order to suit the needs of the analysis or data visualization.
 
 Data can sometimes be in wide or long format. In wide format, categorical data is grouped. Wide data if often easier to read and interpret, but can sometimes lead to issues in conducting analses or visualizing data in r. In long format (think long vertically), every row represents an observation belonging to a particular category.
 
+Data is rearranged according to the key and the value. The key is an attribute and explains what the data describes. The value is the value of the observation described by the key.
+
+Using the tidyr package, we can convert easily between long and wide format.
+
+### Spread
 + Spread() is used to seperate data from two columns into many, based on the number of categories. In other words, go from long to wide format. The key column is used to assign categories to the header of each column, and the values get arranged by category.
++ spread(data, key, value)
 
+### Gather
 + Gather() is used to take more than one column, and consolidate them into two columns based on the key column attributes. In other words, go from wide to long. The key column contains the categorical data, and the value column contains the corresponding values.
++ gather(data, key, value)
 
-Spread(data, key, value)
-Gather(data, key, value)
 
 Check out these links for more information:
 https://github.com/rstudio/cheatsheets/blob/master/data-import.pdf
@@ -79,34 +83,62 @@ https://garrettgman.github.io/tidying/
 ```{r spread_gather1}
 
 # What kind of data is this?
-
 View(cougar)
 
 # How can we convert the data format?
 
 
+# Now how can we convert it back to its original format?
+
+
 ```
 
-## Spread and gather example 2
-```{r spread_gather2}
 
+## Spread and gather problem
+```{r spread_gather_p}
 # Problem - we want to create a plot showing the changes in proportional biomass of various functional groups over time, but our data is not set up in a way that is conducive to making that plot.
 
-plot_arth <- ggplot(arth_data_2) + 
-  geom_bar(aes(x = year_restoration, y = proportional_biomass, fill = functional_group), position = "fill", stat = "summary", fun.y = "mean") +
+View(arth_data)
+
+plot_det <- ggplot(arth_data) + 
+  geom_bar(aes(x = year_restoration, y = detritivores), stat = "summary", fun.y = "mean") +
   theme_classic() +
   ggtitle("Changes in proportional biomass of arthropods over time") +
   xlab("Year of restoration") +
   ylab("Proportional biomass") +
   scale_y_continuous(expand=c(0,0), breaks = c(.2,.4,.6,.8,1))+
-  scale_x_discrete(expand=c(0.2,0))+
-  scale_fill_brewer("Functional Group",palette="Set2", labels=c("Detritivore", "Herbivore (chewing)", "Herbivore (sucking)", "Parasitoid", "Pollinator", "Predator", "Scavenger")) +
-  theme(plot.title = element_text(face="bold", size = 11),
-        axis.title = element_text(size=8),
-        legend.title = element_text(size=8, face="bold"),
-        legend.text = element_text(size=8))
+  scale_x_continuous(expand=c(0.1,0), breaks = c(0,1,2,3,4,5))
+
+plot_det
 
 
+plot_pred <- ggplot(arth_data) + 
+  geom_bar(aes(x = year_restoration, y = predator), stat = "summary", fun.y = "mean") +
+  theme_classic() +
+  ggtitle("Changes in proportional biomass of arthropods over time") +
+  xlab("Year of restoration") +
+  ylab("Proportional biomass") +
+  scale_y_continuous(expand=c(0,0), breaks = c(.2,.4,.6,.8,1))+
+  scale_x_continuous(expand=c(0.1,0), breaks = c(0,1,2,3,4,5))
+
+plot_pred
+
+# In order to make a gpplot with grouping by functional group, we would need one column with all the values, and one column with the category. In this example, the category is habitat type and the value is the proportional biomass of detritivores
+plot_pred <- ggplot(arth_data) + 
+  geom_bar(aes(x = year_restoration, y = detritivores, fill = type), position = "fill", stat = "summary", fun.y = "mean") +
+  theme_classic() +
+  ggtitle("Changes in proportional biomass of arthropods over time") +
+  xlab("Year of restoration") +
+  ylab("Proportional biomass") +
+  scale_y_continuous(expand=c(0,0), breaks = c(.2,.4,.6,.8,1))+
+  scale_x_continuous(expand=c(0.1,0), breaks = c(0,1,2,3,4,5))
+
+plot_pred
+
+```
+
+## Spread and gather example 2
+```{r spread_gather2}
 # Gather - we are taking all of the proportional biomass values and placing them in one column
 arth_data_2 <- arth_data %>% 
   select(transect, year_restoration, detritivores, herb_chew, herb_suck, parasitoid, pollinator, predator, scavenger) %>% 
