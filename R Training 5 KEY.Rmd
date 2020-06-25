@@ -87,7 +87,7 @@ https://garrettgman.github.io/tidying/
 View(cougar)
 
 # How can we convert the data format?
-gather(cougar, )
+gather(cougar, "year", "total_cougars")
 
 ```
 
