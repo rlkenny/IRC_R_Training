@@ -59,7 +59,7 @@ cougar <- read_csv("example_cougars.csv") %>%
 ## Long and wide format data
 It is sometimes necessary to rearrange the format of data in order to suit the needs of the analysis or data visualization.
 
-Data can sometimes be in wide or long format. In wide format, categorical data is grouped. Wide data if often easier to read and interpret, but can sometimes lead to issues in conducting analyses or visualizing data in r. In long format (think long vertically), every row represents an observation belonging to a particular category.
+Data is sometimes arranged in wide or long format. In wide format, categorical data is grouped. Wide data if often easier to read and interpret, but can sometimes lead to issues in conducting analyses or visualizing data in r. In long format (think long vertically), every row represents an observation belonging to a particular category.
 
 Data is rearranged according to the key and the value. The key is an attribute and explains what the data describes. The value is the value of the observation described by the key.
 
