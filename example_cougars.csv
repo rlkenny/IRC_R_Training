@@ -1,4 +1,7 @@
-﻿Location,2018,2019
-Blackstar,10,13
-Limestone,12,16
-Weir,8,7
+﻿Location,Camera,2017,2018,2019
+Blackstar,A,9,9,14
+Blackstar,B,8,10,13
+Limestone,A,10,12,16
+Limestone,B,11,13,16
+Weir,A,4,8,9
+Weir,B,5,8,7
