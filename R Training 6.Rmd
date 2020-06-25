@@ -15,23 +15,22 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r load}
 
 # Load packages
-library(readxl)
-library(readr)
+library(here)
 library(tidyverse)
 library(janitor)
-library(here)
 
 # Load agua chinon veg data
-ac_data_raw <- read_excel("OCWR_AC_2019_Data.xlsx")
+
+ac_data_raw <- read_excel(here("data", "OCWR_AC_2019_Data.xlsx"))
 ac_data <- clean_names(ac_data_raw)
 ac_data$polygon_id[which(ac_data$polygon_id=="5M Buffer")] <- "5M BUFFER"
 
 # Load arthropod data
-arth_data <- read_csv("IRC_restoration_arthropod_data.csv") %>% 
+arth_data <- read_csv(here("data", "IRC_restoration_arthropod_data.csv")) %>% 
   clean_names()
 
 # Load cougar example data
-cougar <- read_csv("example_cougars.csv") %>% 
+cougar <- read_csv(here("data", "example_cougars.csv")) %>% 
   clean_names
 
 ```
