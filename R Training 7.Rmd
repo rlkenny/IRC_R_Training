@@ -1,0 +1,267 @@
+---
+title: "R Training 7"
+author: "Rachel Kenny"
+date: "7/09/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Loading packages & data
+```{r load}
+
+# Load packages
+library(here)
+library(tidyverse)
+library(janitor)
+library(readxl)
+
+# Load agua chinon veg data
+
+ac_data_raw <- read_excel(here("data", "OCWR_AC_2019_Data.xlsx"))
+ac_data <- clean_names(ac_data_raw)
+ac_data$polygon_id[which(ac_data$polygon_id=="5M Buffer")] <- "5M BUFFER"
+
+```
+
+
+## REVIEW: ggplots
+### Default plot
+```{r}
+# Plot 1 - default plot plus titles and axis labels
+plot1 <- ggplot(ac_data, aes(layer, fill=functional_group)) +
+  geom_bar(position="dodge") +
+  xlab("Layer") +
+  ylab("Count") +
+  ggtitle("Vegetation at Agua Chinon by layer and functional group") +
+  theme_classic()
+
+plot1
+```
+
+### Adjust axes position and tick mark labels
+```{r}
+# Plot 2 - Use scale x/y discrete/continuous to adjust where the x and y axis lay in relation to the data, and to adjust the labels of the axis tick marks. Notice in the labels the use of "\n" to create a line break
+
+# Show every tick mark from 0 - 300
+plot2a <- plot1 +
+  scale_x_discrete(expand=c(0.2,0), labels = c("No vegetation", "Herb", "Large\nshrub/tree", "Shrub")) +
+  scale_y_continuous(expand=c(0,0), breaks = 0:300)
+
+# Use a predefined sequence and range for tick marks
+plot2b <- plot1 +
+  scale_x_discrete(expand=c(0.2,0), labels = c("No vegetation", "Herb", "Large\nshrub/tree", "Shrub")) +
+  scale_y_continuous(expand=c(0,0), breaks=seq(0, 350, by = 50))
+
+# Define sequence manually
+plot2c <- plot1 +
+  scale_x_discrete(expand=c(0.2,0), labels = c("No vegetation", "Herb", "Large\nshrub/tree", "Shrub")) +
+  scale_y_continuous(expand=c(0,0), breaks=c(0, 75, 250, 300))
+
+plot2a
+plot2b
+plot2c
+```
+
+
+### Add horizontal or vertical lines to plot
+```{r}
+# Plot 3 - Add horizontal or vertical lines to plot
+
+plot3a <- plot2b +
+  theme(panel.grid.major.y = element_line(colour = "grey"))
+
+plot3b <- plot2b +
+  theme(panel.grid.major.x = element_line(colour = "blue"))
+
+plot3a
+plot3b
+```
+
+### Adjust legend items fit
+```{r}
+# Plot 4 - Make legend fit better
+
+plot4 <- plot3a + scale_fill_discrete(name="Functional Groups", labels = c("no vegetation", "Annual forb\n(late flowering)", "Annual forb\n(other)", "Forb", "Grass", "Large Shrub", "Perennial Forb\n(late flowering)", "Perennial Forb\n(other)", "Perennial Grass\n(other)", "Shrub", "Shrub\n(late flowering)", "Shrub\n(other)", "Tree"))+
+  guides(fill=guide_legend(nrow=7)) # This breaks it up into columns based on having 7 observations per column
+
+plot4
+```
+
+## Adjust text size, color, font family, and bold/italic
+```{r}
+# Plot 5 - Adjust text size, color, font family, and bold/italic
+
+plot5a <- plot4 +
+  theme(plot.title=element_text(size = 10, color = "blue", family = "serif", face="italic"))
+
+plot5b <- plot4 +
+  theme(plot.title=element_text(size = 20, color = "#449d8b", family = "mono"))
+
+plot5c <- plot4 +
+  theme(plot.title=element_text(size = 14, family = "sans", face="bold"))
+
+plot5d <- plot4 +
+  theme(plot.title=element_text(size = 12, family = "Times"))
+
+plot5a
+plot5b
+plot5c
+plot5d
+```
+
+## Adjust all plot text elements
+```{r}
+# Plot 6 - Adjust all plot text elements
+
+# Plot title
+plot6a <- plot5c +
+  theme(plot.title = element_text(color = "blue"))
+
+# Axes titles
+plot6b <- plot5c +
+  theme(axis.title = element_text(color = "blue"))
+
+plot6c <- plot5c +
+  theme(axis.title.x = element_text(color = "blue"))
+
+plot6d <- plot5c +
+  theme(axis.title.y = element_text(color = "blue"))
+
+# Axes tick marks
+plot6e <- plot5c +
+  theme(axis.text = element_text(color = "blue"))
+
+plot6f <- plot5c +
+  theme(axis.text.x = element_text(color = "blue"))
+
+plot6g <- plot5c +
+  theme(axis.text.y = element_text(color = "blue"))
+
+# Legend
+plot6h <- plot5c +
+  theme(legend.title = element_text(color = "blue"))
+
+plot6i <- plot5c +
+  theme(legend.text = element_text(color = "blue"))
+
+plot6a
+plot6b
+plot6c
+plot6d
+plot6e
+plot6f
+plot6g
+plot6h
+plot6i
+
+```
+
+## Adjust axes text position
+```{r}
+
+# Adjust horizontal justification
+plot7a <- plot5c +
+  theme(axis.text.x = element_text(hjust = 0))
+
+plot7b <- plot5c +
+  theme(axis.text.x = element_text(hjust = 1))
+
+plot7c <- plot5c +
+  theme(axis.text.x = element_text(hjust = .5))
+
+# Adjust vertical justification
+plot7d <- plot5c +
+  theme(axis.text.x = element_text(vjust = 0))
+
+plot7e <- plot5c +
+  theme(axis.text.x = element_text(vjust = 1))
+
+# Adjust angle
+plot7f <- plot5c +
+  theme(axis.text.x = element_text(angle = 30))
+
+plot7g <- plot5c +
+  theme(axis.text.x = element_text(angle = 90))
+
+plot7h <- plot5c +
+  theme(axis.text.x = element_text(angle = -90))
+
+plot7i <- plot1 +
+  theme(axis.text.x = element_text(angle = -90, hjust = 0, vjust = .3))
+
+plot7a
+plot7b
+plot7c
+plot7d
+plot7e
+plot7f
+plot7g
+plot7h
+plot7i
+
+```
+
+
+```{r}
+
+# Notice I added a code to even out the column width under geom bar
+
+plot_final <- ggplot(ac_data, aes(layer, fill=functional_group)) +
+  geom_bar(position = position_dodge2(width = 0.9, preserve = "single")) +
+  xlab("Layer") +
+  ylab("Count") +
+  ggtitle("Vegetation at Agua Chinon by layer and functional group") +
+  scale_x_discrete(expand=c(0.2,0), labels = c("No vegetation", "Herb", "Large\nshrub/tree", "Shrub")) +
+  scale_y_continuous(expand=c(0,0)) +
+  theme_classic() +
+  theme(plot.title=element_text(face="bold", size = 14), 
+        axis.text.x = element_text(size = 8), 
+        legend.text = element_text(size = 6), 
+        panel.grid.major.y = element_line(colour = "grey"))+
+  scale_fill_manual(name="Functional Groups", 
+                    labels = c("no vegetation", "Annual forb\n(late flowering)", "Annual forb\n(other)", "Forb", "Grass", "Large Shrub", "Perennial Forb\n(late flowering)", "Perennial Forb\n(other)", "Perennial Grass\n(other)", "Shrub", "Shrub\n(late flowering)", "Shrub\n(other)", "Tree"), 
+                    values = c("#a6cd5b", "#752559", "#72bad3", "#eb4024", "#a66f5b", "#449d8b", "#eb8932", "#2c6b96", "#e8af3c", "#9c8dc3", "orchid3", "seagreen3", "yellow"))+
+  guides(fill=guide_legend(nrow=7))
+
+plot_final
+
+```
+
+
+## Mitigation veg analysis - Functional group
+```{r functional}
+
+#Create dataframe containing only native species
+ac_native <- ac_data %>% 
+  filter(native_non_native == "Native")
+
+# Isolate relevant columns (polygon id, transect, and functional group) and tally number of plants in each functional group
+functional1 <- ac_native %>% 
+  filter(data_type == "T.PI") %>% 
+  group_by(polygon_id,transect, functional_group) %>%
+  count() 
+View(functional1)
+
+
+# Group by polygon id and transect, and tally total number of different functional groups per polygon id and transect
+functional2 <- functional1 %>% 
+  group_by(polygon_id,transect) %>% 
+  count()
+View(functional2)
+
+
+# For polygons with multiple transects, take the average number of functional groups per transect, then round to one digit
+functional3 <- aggregate(functional2[3],list(functional2$polygon_id), mean)
+colnames(functional3) <- c("polygon_id","avg_num_functional_groups")
+functional3$avg_num_functional_groups <- round(functional3$avg_num_functional_groups,digits=1)
+View(functional3)
+
+```
+
+
+

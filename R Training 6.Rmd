@@ -2,7 +2,9 @@
 title: "R Training 6"
 author: "Rachel Kenny"
 date: "6/23/2020"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -18,6 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(here)
 library(tidyverse)
 library(janitor)
+library(readxl)
 
 # Load agua chinon veg data
 
@@ -178,16 +181,18 @@ View(cover2)
 cover2 <- cover2[,c(1,2,3,5,4)]
 cover2[is.na(cover2)] = 0
 
-# View(cover2)
+View(cover2)
 
 
 
 # For polygons with multiple transects, average the values per polygon id, and then round all numbers
 cover3 <- aggregate(cover2[3:5],list(cover2$polygon_id), mean)
+View(cover3)
+
 colnames(cover3) <- c("polygon_id","avg_native_count", "avg_non_native_count", "avg_no_native_count")
 cover3[,-1] <- round(cover3[,-1],1)
 
-# View(cover3)
+View(cover3)
 
 
 
@@ -196,6 +201,8 @@ cover3[,-1] <- round(cover3[,-1],1)
 cover3_table <- mutate(cover3, absolute_cover_native = avg_native_count*100/50) 
 cover3_table <- mutate(cover3_table, absolute_cover_non_native = avg_non_native_count*100/50) 
 cover3_table <- mutate(cover3_table, absolute_cover_no_native = avg_no_native_count*100/50)
+
+View(cover3_table)
 
 # RELATIVE COVER
 # To get relative native cover, take absolute native cover value and divide by absolute value native + absolute value non native, then multiply by 100. To get relative non-native cover, take absolute non-native cover value and divide by absolute value native + absolute value non native, then multiply by 100. 
@@ -207,7 +214,7 @@ cover3_table[,-1] <-round(cover3_table[,-1],1)
 cover3_table <- cover3_table %>% 
   select(polygon_id, absolute_cover_native, absolute_cover_non_native, absolute_cover_no_native, relative_cover_native, relative_cover_non_native)
 
-# View(cover3_table)
+View(cover3_table)
 
 
 ```
